@@ -1,63 +1,77 @@
-def check(l1, c1, l2, c2):  # проверка корректности введенных координат
-    if l1 == l2 and c1 == c2:  # координаты не должны совпадать
+def check(line1, column1, line2, column2):  # проверка правильности введения координат.
+    if line1 == line2 and column1 == column2:  # проверка на совпадение координат
         return 0
-    if gf[l1][c1] == '-' or gf[l2][c2] == '-':  # в ячейке не должно быть '-'
+    if gf[line1][column1] == '-' or gf[line2][column2] == '-':  # в ячейке не должно быть "-"
         return 0
-    if gf[l1][c1] + gf[l2][c2] == 10:  # числа можно убрать, если их сумма 10
+    if gf[line1][column1] + gf[line2][column2] == 10:  # числа можно вычеркнуть ,если их сумма 10
         return 1
-    if gf[l1][c1] == gf[l2][c2]:  # если числа равны
-        if c1 == c2:  # если находятся в одном столбце
-            return 1 if all(gf[l1][c] == '-' for c in range(min(c1, c2) + 1, max(c1, c2))) else 0
-        if l1 == l2:  # если находятся на одной линии
-            return 1 if abs(c1 - c2) == 1 or (gf[l1][min(c1, c2) + 1:max(c1, c2)] == ['-'] * (abs(c1 - c2) - 1)) else 0
-    return 0
+    if gf[line1][column1] == gf[line2][column2]:  # если числа  равны
+        if column1 == column2 or line1 == line2:  # если введены координаты с одной линии или с одного столбца
+            if abs(column1 - column2) == 1 or abs(line1 - line2) == 1:  # если введены координаты соседних ячеек
+                return 1
+            else:
+                if column1 == column2:  # если стоят в одном стобце
+                    if gf[1][column1] == '-':
+                        return 1
+                    else:
+                        return 0
+                if line1 == line2:
+                    for c in range(min(column1, column2) + 1, max(column1, column2)):  # если стоят в одной линии
+                        if gf[line1][c] != '-':
+                            return 0
+                    return 1
+        else:
+            return 0
 
-def finish(gf):  # проверка возможности найти ячейки для взаимодействия
+
+def finish(gf):  # проверка нахождение ячейки для взаимодействия 
     if gf.count('-') == 26:
         return 0
-    for l1 in range(3):
-        for c1 in range(9):
-            for l2 in range(3):
-                for c2 in range(9):
-                    if check(l1, c1, l2, c2) == 1:
-                        return 1
-    return 0
+    else:
+        for line1 in range(3):
+            for column1 in range(9):
+                for line2 in range(3):
+                    for column2 in range(9):
+                        if check(line1, column1, line2, column2) == 1:
+                            return 1
+        return 0
 
-def finalgamefield(gf):  # отрисовка финального поля
+
+def finalgamefield(gf):  #  финальное игровое поле
+    lastslot = 0
     if gf.count('-') == 26 and gf[2][8] == '9':
         return gf
+    for line1 in range(3):
+        for column1 in range(9):
+            if gf[2 - line1][8 - column1] != '-':
+                gf[2 - (lastslot // 9)][8 - lastslot] = gf[2 - line1][8 - column1]
+                gf[2 - line1][8 - column1] = '-'
+                lastslot += 1
+    return (gf)
 
-    lastcell = 0
-    for l1 in range(3):
-        for c1 in range(9):
-            if gf[2 - l1][8 - c1] != '-':
-                gf[2 - (lastcell // 9)][8 - lastcell] = gf[2 - l1][8 - c1]
-                gf[2 - l1][8 - c1] = '-'
-                lastcell += 1
-    return gf
 
-gf = [[1, 2, 3, 4, 5, 6, 7, 8, 9],
-      [1, 1, 1, 2, 1, 3, 1, 4, 1],
-      [5, 1, 6, 1, 7, 1, 8, 1, 9]]
+gf = [[1, 2, 3, 4, 5, 6, 7, 8, 9], [1, 1, 1, 2, 1, 3, 1, 4, 1], [5, 1, 6, 1, 7, 1, 8, 1, 9]]
 
 gameover = 0
 while gameover == 0:
     if finish(gf) == 1:
         print('   1 2 3 4 5 6 7 8 9')
         print(' -------------------')
-        for i, row in enumerate(gf):
-            print(f'{i + 1}| ' + ' '.join(map(str, row)))
-
-        l1, c1 = int(input('Введите номер линии первого элемента: ')) - 1, int(input('Введите номер столбца первого элемента: ')) - 1
-        l2, c2 = int(input('Введите номер линии второго элемента: ')) - 1, int(input('Введите номер столбца второго элемента: ')) - 1
-
-        if check(l1, c1, l2, c2) == 1:
-            gf[l1][c1], gf[l2][c2] = '-', '-'
+        print('1| ' + ''.join([str(x) + ' ' for x in gf[0]]))
+        print('2| ' + ''.join([str(x) + ' ' for x in gf[1]]))
+        print('3| ' + ''.join([str(x) + ' ' for x in gf[2]]))
+        line1 = int(input('Номер линии первого числа: ')) - 1
+        column1 = int(input('Номер столбца первого числа: ')) - 1
+        line2 = int(input('Номер линии второго числа: ')) - 1
+        column2 = int(input('Номер столбца второго числа: ')) - 1
+        if check(line1, column1, line2, column2) == 1:
+            gf[line1][column1], gf[line2][column2] = '-', '-'
         else:
-            print('Координаты введены некорректно')
+            print('Неверные координаты')
     else:
         print('Игра окончена!')
         gameover = 1
         fgf = finalgamefield(gf)
-        for row in fgf:
-            print(*row)
+        print(*fgf[0])
+        print(*fgf[1])
+        print(*fgf[2])
